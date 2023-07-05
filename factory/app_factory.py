@@ -18,8 +18,9 @@ def load_user(user_id):
 
 def create_app():
     template_dir = os.path.abspath('./templates')
+    static_dir = os.path.abspath('./static')
 
-    app = Flask(__name__, template_folder=template_dir, static_url_path='/static')
+    app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
     login_manager.init_app(app)
 
@@ -37,7 +38,7 @@ def create_app():
     Session(app)
 
     with app.app_context():
-        db.drop_all()
+        # db.drop_all()
         db.create_all()
         inspect(db.engine)
 

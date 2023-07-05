@@ -1,25 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='styles/main.css') }}" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Steps</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        .add-steps-form {
+            display: none;
+        }
+    </style>
 </head>
-
-
-<body class="bg-light">
-    <div class="container py-5">
-        <div id="steps" class="row">
+<body>
+    <div class="container">
+        <div id="steps">
             {% for step in steps %}
-            <div class="step col-12 mb-4">
+            <div class="step">
                 <div class="card">
-                    <div class="card-header text-center">
+                    <div class="card-header">
                         <h2>{{ step.type }}</h2>
                     </div>
                     <div id="plot_{{ step.id }}" class="card-body plot-container"></div>
+                    <div class="card-body">
+                        <button class="btn btn-primary add-step-btn">+</button>
+                        <div class="add-steps-form">
+                            {% include 'add_steps_form.html' %}
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endfor %}
+            {% if not steps %}
+            <div class="step">
+                <div class="card">
+                    <div class="card-body">
+                        <button class="btn btn-primary add-step-btn">+</button>
+                        <div class="add-steps-form">
+                            {% include 'add_steps_form.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
-
         <script>
             $(document).ready(function() {
                 const steps = [{% for step in steps %}{{ step.id }}{% if not loop.last %}, {% endif %}{% endfor %}];
@@ -46,7 +70,35 @@
                 loadPlot(0);
             });
         </script>
-
-        {% include 'add_steps_form.html' %}
     </div>
+
+    <script>
+        $(document).ready(function() {
+            let mouseLeftStep = true;
+
+            $('.step').mouseenter(function() {
+                mouseLeftStep = false;
+                $(this).find('.add-step-btn').show();
+            });
+
+            $('.step').mouseleave(function() {
+                mouseLeftStep = true;
+                $(this).find('.add-steps-form').hide();
+                $(this).find('.add-step-btn').hide();
+            });
+
+            $('.add-step-btn').click(function() {
+                $(this).hide();
+                $(this).siblings('.add-steps-form').show();
+            });
+
+            $(document).mousemove(function(event) {
+                if (mouseLeftStep) {
+                    $('.add-steps-form').hide();
+                    $('.add-step-btn').hide();
+                }
+            });
+        });
+    </script>
 </body>
+</html>
