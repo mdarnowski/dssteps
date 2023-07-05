@@ -7,25 +7,30 @@ dss = DatasetService()
 
 class StepsList:
     def __init__(self, dataset_id):
-        self.tail = None
-        self.head = None
+        self.steps = None
         self.dataset_id = dataset_id
         self.load_from_db()
 
     def load_from_db(self):
         steps = Step.query.filter_by(dataset_id=self.dataset_id).order_by(Step.id).all()
-        self.head = steps[0] if steps else None
-        self.tail = steps[-1] if steps else None
+        self.steps = {step.id: step for step in steps}
 
-    def append(self, step):
+    def append(self, step, after_step_id=None):
         step.dataset_id = self.dataset_id
-
-        if self.tail:
-            step.prev_step_id = self.tail.id
-            self.tail.next_step_id = step.id
-            db.session.commit()
+        if after_step_id:
+            previous_step = self.steps[after_step_id]
+            step.prev_step_id = previous_step.id
+            step.next_step_id = previous_step.next_step_id
+            if previous_step.next_step_id:
+                next_step = self.steps[previous_step.next_step_id]
+                next_step.prev_step_id = step.id
+            previous_step.next_step_id = step.id
+        else:
+            if self.steps:
+                last_step = max(self.steps.values(), key=lambda step: step.id)
+                last_step.next_step_id = step.id
+                step.prev_step_id = last_step.id
 
         db.session.add(step)
         db.session.commit()
-
-        self.tail = step
+        self.steps[step.id] = step

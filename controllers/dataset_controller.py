@@ -13,9 +13,9 @@ dataset_service = DatasetService()
 
 
 @dataset_controller_blueprint.route('/add_steps/<int:dataset_id>', methods=['GET', 'POST'])
-def add_steps(dataset_id):
+@dataset_controller_blueprint.route('/add_steps/<int:dataset_id>/<int:after_step_id>', methods=['POST'])
+def add_steps(dataset_id, after_step_id=None):
     steps_list = StepsList(dataset_id)
-    df = dataset_service.get_dataset_dataframe(dataset_id)
     if request.method == 'POST':
         step_type = request.form['type']
         step = StepFactory.create_step(step_type)
@@ -24,14 +24,13 @@ def add_steps(dataset_id):
         db.session.add(step)
         db.session.commit()
 
-        steps_list.append(step)
+        steps_list.append(step, after_step_id)
 
-        # Update the code below
         return redirect(url_for('dataset_controller.add_steps', dataset_id=dataset_id, _anchor=f'plot_{step.id}'))
 
     step_types = get_step_types()
-    steps = Step.query.filter_by(dataset_id=dataset_id).all()  # Fetch all steps associated with the dataset
-    return render_template('add_steps.html', dataset_id=dataset_id, step_types=step_types, steps=steps)  # Pass the steps to the template
+    steps = Step.query.filter_by(dataset_id=dataset_id).all()
+    return render_template('add_steps.html', dataset_id=dataset_id, step_types=step_types, steps=steps)
 
 
 @dataset_controller_blueprint.route('/get_plot/<int:step_id>', methods=['GET'])
