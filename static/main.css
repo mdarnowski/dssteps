@@ -81,3 +81,11 @@ p {
     outline: none;
     border-color: #007bff;
 }
+
+.add-steps-form {
+    display: none;
+}
+
+.add-step-btn {
+    display: none;
+}
