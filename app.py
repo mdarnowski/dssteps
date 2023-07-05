@@ -1,4 +1,4 @@
-from flask import request, session, redirect, url_for, render_template
+from flask import request, session, render_template
 import logging
 
 from controllers.dataset_controller import add_dataset

@@ -5,7 +5,7 @@ from flask_session import Session
 from sqlalchemy import inspect
 
 from models.alchemy import db
-from models.alchemy import User  # Assuming User model is defined in user_model.py
+from models.alchemy import User
 from controllers.dataset_controller import dataset_controller_blueprint
 
 login_manager = LoginManager()
