@@ -18,7 +18,8 @@ def load_user(user_id):
 
 def create_app():
     template_dir = os.path.abspath('./templates')
-    app = Flask(__name__, template_folder=template_dir)
+
+    app = Flask(__name__, template_folder=template_dir, static_url_path='/static')
 
     login_manager.init_app(app)
 

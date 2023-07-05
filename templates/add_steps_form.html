@@ -1,0 +1,10 @@
+<form action="/add_steps/{{ dataset_id }}" method="post" class="mb-4">
+    <div class="form-group d-flex align-items-center">
+        <select name="type" id="type" class="form-control mx-auto" style="max-width: 300px;">
+            {% for step_type in step_types %}
+                <option value="{{ step_type }}">{{ step_type }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Add Step" class="btn btn-primary ml-2">
+    </div>
+</form>
