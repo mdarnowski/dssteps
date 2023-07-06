@@ -4,88 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Steps</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <div id="steps">
-            {% for step in steps %}
-            <div class="step">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>{{ step.type }}</h2>
+        <div id="app">
+            {% raw %}
+            <div v-for="step in steps">
+                <h2>{{ step.type }}</h2>
+                <div :id="'plot_' + step.id"></div>
+
+                <form :action="'/add_steps/' + step.dataset_id" method="post">
+                    <div class="form-group">
+                        <select name="type" id="type" class="form-control">
+                            <option v-for="step_type in step_types" :value="step_type">{{ step_type }}</option>
+                        </select>
+                        <input type="submit" value="Add Step" class="btn btn-primary">
                     </div>
-                    <div id="plot_{{ step.id }}" class="card-body plot-container"></div>
-                    <div class="card-body">
-                        <button class="btn btn-primary add-step-btn">+</button>
-                        <div class="add-steps-form">
-                            {% include 'add_steps_form.html' %}
-                        </div>
-                    </div>
-                </div>
+                </form>
             </div>
-            {% endfor %}
-            {% if not steps %}
-            <div class="step">
-                <div class="card">
-                    <div class="card-body">
-                        <button class="btn btn-primary add-step-btn">+</button>
-                        <div class="add-steps-form">
-                            {% include 'add_steps_form.html' %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+            {% endraw %}
         </div>
-        <script>
-            $(document).ready(function() {
-                const steps = [{% for step in steps %}{{ step.id }}{% if not loop.last %}, {% endif %}{% endfor %}];
-
-                function loadPlot(stepIndex) {
-                    if (stepIndex >= steps.length) {
-                        return;
-                    }
-
-                    const stepId = steps[stepIndex];
-                    $.ajax({
-                        url: '/get_plot/' + stepId,
-                        type: 'GET',
-                        success: function(response) {
-                            $('#plot_' + stepId).html(response);
-                            loadPlot(stepIndex + 1);
-                        },
-                        error: function(error) {
-                            console.log(error);
-                        }
-                    });
-                }
-
-                loadPlot(0);
-            });
-        </script>
     </div>
 
     <script>
+        window.serverData = {
+            steps: [{% for step in steps %}{ id: {{ step.id }}, type: "{{ step.type }}", dataset_id: "{{ dataset_id }}" }{% if not loop.last %}, {% endif %}{% endfor %}],
+            step_types: [{% for step_type in step_types %}"{{ step_type }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+        };
+
+        new Vue({
+            el: '#app',
+            data: {
+                steps: window.serverData.steps,
+                step_types: window.serverData.step_types
+            }
+        });
+
         $(document).ready(function() {
-            $('.add-step-btn').hide();
+            const steps = window.serverData.steps;
 
-            $('.step').mouseenter(function() {
-                $(this).find('.add-step-btn').show();
-            });
+            function loadPlot(stepIndex) {
+                if (stepIndex >= steps.length) {
+                    return;
+                }
 
-            $('.step').mouseleave(function() {
-                $(this).find('.add-steps-form').hide();
-                $(this).find('.add-step-btn').hide();
-            });
+                const stepId = steps[stepIndex].id;
+                $.ajax({
+                    url: '/get_plot/' + stepId,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#plot_' + stepId).html(response);
+                        loadPlot(stepIndex + 1);
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            }
 
-            $('.add-step-btn').click(function() {
-                $(this).hide();
-                $(this).siblings('.add-steps-form').show();
-            });
+            loadPlot(0);
         });
     </script>
-
 </body>
 </html>
