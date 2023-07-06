@@ -40,10 +40,11 @@ def get_plot(step_id):
     df = dataset_service.get_dataset_dataframe(step.dataset_id)
     logging.debug(f'Loaded DataFrame with shape {df.shape} for step {step_id}')
 
-    plot_html = step.plot(df)
-    logging.debug(f'Generated plot HTML with length {len(plot_html)} for step {step_id}')
+    plot_json = step.plot(df)
+    logging.debug(f'Generated plot JSON with length {len(plot_json)} for step {step_id}')
 
-    return Markup(plot_html)
+    return plot_json
+
 
 
 @dataset_controller_blueprint.route('/dataset', methods=['POST'])

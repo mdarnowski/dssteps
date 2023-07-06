@@ -79,6 +79,4 @@ class PreviewStep(Step):
                        align='left'))
         ])
 
-        table_html = plotly.offline.plot(table, output_type='div')
-
-        return table_html
+        return table.to_json()
