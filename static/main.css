@@ -18,6 +18,11 @@ body {
     overflow: visible;
 }
 
+.card-body {
+    position: relative;
+}
+
+
 .card:hover {
     transform: scale(1.03);
     box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.2);
@@ -84,8 +89,19 @@ p {
 
 .add-steps-form {
     display: none;
+    position: relative;
+    text-align: center;
 }
 
 .add-step-btn {
+    display: none;
+    margin: 0 auto;
+}
+
+.step:hover .add-step-btn {
+    display: block;
+}
+
+.step:hover .add-steps-form {
     display: none;
 }

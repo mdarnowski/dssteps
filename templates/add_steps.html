@@ -69,15 +69,13 @@
 
     <script>
         $(document).ready(function() {
-            let mouseLeftStep = true;
+            $('.add-step-btn').hide();
 
             $('.step').mouseenter(function() {
-                mouseLeftStep = false;
                 $(this).find('.add-step-btn').show();
             });
 
             $('.step').mouseleave(function() {
-                mouseLeftStep = true;
                 $(this).find('.add-steps-form').hide();
                 $(this).find('.add-step-btn').hide();
             });
@@ -86,14 +84,8 @@
                 $(this).hide();
                 $(this).siblings('.add-steps-form').show();
             });
-
-            $(document).mousemove(function(event) {
-                if (mouseLeftStep) {
-                    $('.add-steps-form').hide();
-                    $('.add-step-btn').hide();
-                }
-            });
         });
     </script>
+
 </body>
 </html>
