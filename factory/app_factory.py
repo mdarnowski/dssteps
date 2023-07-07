@@ -28,7 +28,8 @@ def create_app():
     app.config['SECRET_KEY'] = 'thisisasecret'
 
     # Configure SQLAlchemy
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:sa@localhost/dssteps'
+
     db.init_app(app)  # Initialize db with app
 
     # Configure server-side session with SQLAlchemy

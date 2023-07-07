@@ -1,6 +1,5 @@
-import plotly
 from flask_login import UserMixin
-from sqlalchemy import Column, Integer, String, LargeBinary, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, LargeBinary, ForeignKey
 from flask_sqlalchemy import SQLAlchemy
 import plotly.graph_objects as go
 
@@ -9,7 +8,7 @@ db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
-    id = db.Column(db.String(36), primary_key=True)
+    id = db.Column(String(36), primary_key=True)
     datasets = db.relationship("Dataset", back_populates="user")
 
     @property
@@ -31,7 +30,7 @@ class User(UserMixin, db.Model):
 class Dataset(db.Model):
     __tablename__ = 'dataset'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(String(36), ForeignKey('user.id'))
     user = db.relationship("User", back_populates="datasets")
     url = Column(String(500), nullable=False)
     data = Column(LargeBinary, nullable=False)
