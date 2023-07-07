@@ -1,7 +1,6 @@
 import logging
 import uuid
 from flask import Blueprint, redirect, url_for, render_template, session, request
-from markupsafe import Markup
 from factory.step_factory import StepFactory
 from models.alchemy import Step, db
 from services.login import login
@@ -20,7 +19,6 @@ def add_steps(dataset_id, after_step_id=None):
         step_type = request.form['type']
         step = StepFactory.create_step(step_type)
 
-        # Save the step to the database so it gets an ID.
         db.session.add(step)
         db.session.commit()
 
@@ -46,13 +44,11 @@ def get_plot(step_id):
     return plot_json
 
 
-
 @dataset_controller_blueprint.route('/dataset', methods=['POST'])
 def add_dataset():
     url = session.get('url', None)
     if url is None:
         return redirect(url_for('home'))
-    # create a new user for each session
     user_id = str(uuid.uuid4())
     login(user_id)
     ds = dataset_service.add_dataset(user_id, url)

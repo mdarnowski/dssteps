@@ -6,38 +6,70 @@
     <title>Add Steps</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
     <div class="container">
         <div id="app">
             {% raw %}
             <div v-for="step in steps">
-                <h2>{{ step.type }}</h2>
-                <div :id="`plot_${step.id}`" style="height: 500px;"></div>
-                <form :action="'/add_steps/' + step.dataset_id" method="post">
-                    <div class="form-group">
-                        <select name="type" id="type" class="form-control">
-                            <option v-for="step_type in step_types" :value="step_type">{{ step_type }}</option>
-                        </select>
-                        <input type="submit" value="Add Step" class="btn btn-primary">
-                    </div>
-                </form>
+                <div class="plot-form-container"
+                     @mouseover="hoveredStepId = step.id; clearTimeout(resetHoveredStepIdTimeout);"
+                     @mouseout="resetHoveredStepIdTimeout = setTimeout(() => { hoveredStepId = null }, 200);">
+                    <h2>{{ step.type }}</h2>
+                    <div :id="`plot_${step.id}`" style="height: 500px;"></div>
+                    <step-form
+                        v-if="hoveredStepId === step.id"
+                        :step-types="step_types"
+                        :prev-step="step"
+                        @submit="submitForm"
+                        @mouseover="clearTimeout(resetHoveredStepIdTimeout)">
+                    </step-form>
+                </div>
             </div>
+            <step-form
+                v-if="hoveredStepId === null"
+                :step-types="step_types"
+                :prev-step="null"
+                @submit="submitForm"
+                @mouseover="clearTimeout(resetHoveredStepIdTimeout)"
+                @mouseout="resetHoveredStepIdTimeout = setTimeout(() => { hoveredStepId = null }, 200);">
+            </step-form>
             {% endraw %}
         </div>
     </div>
 
     <script>
+        Vue.component('step-form', {
+          props: ['stepTypes', 'prevStep'],
+          render: function (createElement) {
+            return createElement('div', { class: 'button-menu' },
+              this.stepTypes.map(step_type =>
+                createElement('button',
+                  {
+                    class: 'button-menu-item',
+                    on: { click: () => this.$emit('submit', this.prevStep, step_type) }
+                  },
+                  step_type)
+              )
+            )
+          }
+        });
+
         window.serverData = {
             steps: [{% for step in steps %}{ id: {{ step.id }}, type: "{{ step.type }}", dataset_id: {{ step.dataset_id }}, plotHtml: "" }{% if not loop.last %}, {% endif %}{% endfor %}],
-            step_types: [{% for step_type in step_types %}"{{ step_type }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+            step_types: [{% for step_type in step_types %}"{{ step_type }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            dataset_id: {{ dataset_id }}
         };
 
         new Vue({
             el: '#app',
             data: {
                 steps: window.serverData.steps,
-                step_types: window.serverData.step_types
+                step_types: window.serverData.step_types,
+                hoveredStepId: null,
+                resetHoveredStepIdTimeout: null,
+                dataset_id: window.serverData.dataset_id
             },
             created() {
                 this.loadPlot(0);
@@ -58,6 +90,27 @@
                         });
                     })
                     .catch(error => console.log(error));
+                },
+                submitForm: function (prevStep, stepType) {
+                    const formData = new FormData();
+                    formData.append('type', stepType);
+
+                    let fetchURL = '/add_steps/' + this.dataset_id;
+                    if(prevStep) {
+                        fetchURL += '/' + prevStep.id;
+                    }
+
+                    fetch(fetchURL, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        location.reload();
+                    })
+                    .catch(error => console.log('There has been a problem with your fetch operation: ', error));
                 }
             }
         });
